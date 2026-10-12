@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5f1">
+  <meta name="description" content="Turn a rough thought into a clear, ready-to-use prompt." />
+  <meta property="og:title" content="Orato — Voice to prompt">
+  <meta property="og:description" content="Speak or type your idea. Get a perfect AI prompt.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%236256dc'/%3E%3Cpath d='M20 9v22m-7-16v10m14-10v10M7 18v4m26-4v4' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750&display=swap" rel="stylesheet">
+  <title>Orato — Voice to prompt</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20211f;
+      --muted: #777a75;
+      --line: #e8e8e2;
+      --paper: #fff;
+      --canvas: #f6f5f1;
+      --violet: #6654d9;
+      --violet-dark: #5140bd;
+      --soft-violet: #f0edff;
+      --mint: #b9e7d5;
+      --shadow: 0 24px 70px rgba(36, 34, 54, .08), 0 2px 8px rgba(36, 34, 54, .04);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, textarea { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    .page { min-height: 100vh; padding: 27px 5.5vw 32px; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; max-width: 1240px; width: 100%; margin: 0 auto; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 750; letter-spacing: -.045em; }
+    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 10px; color: white; background: var(--violet); box-shadow: 0 4px 10px #6654d944; }
+    .brand-mark svg { width: 17px; height: 17px; }
+    .top-note { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 8px; }
+    .live-dot { width: 7px; height: 7px; background: #58b990; border-radius: 50%; box-shadow: 0 0 0 3px #58b99022; }
+    main { width: min(100%, 1160px); margin: auto; padding: 62px 0 55px; }
+    .intro { max-width: 710px; margin: 0 auto 33px; text-align: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 999px; color: #594bb5; background: var(--soft-violet); font-size: 11px; font-weight: 700; letter-spacing: .035em; }
+    .eyebrow svg { width: 13px; height: 13px; }
+    h1 { margin: 18px 0 13px; font-size: clamp(38px, 5.5vw, 66px); line-height: 1.02; letter-spacing: -.065em; font-weight: 740; }
+    h1 span { color: var(--violet); }
+    .subhead { max-width: 520px; margin: 0 auto; color: var(--muted); font-size: 15px; line-height: 1.65; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 760px); justify-content: center; gap: 17px; }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--paper); box-shadow: var(--shadow); overflow: hidden; }
+    .panel-head { min-height: 58px; padding: 0 21px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0ec; }
+    .panel-title { display: flex; gap: 9px; align-items: center; font-size: 12px; font-weight: 720; letter-spacing: .005em; }
+    .step { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 8px; background: #f0f0ec; color: #6a6c67; font-size: 10px; font-weight: 750; }
+    .panel-meta { color: #9b9d98; font-size: 11px; }
+    .input-body { padding: 19px 21px 16px; }
+    textarea { display: block; resize: vertical; width: 100%; min-height: 166px; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 14px; line-height: 1.75; }
+    textarea::placeholder { color: #a7a9a4; }
+    .input-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid #f0f0ec; }
+    .hint { color: #9b9d98; font-size: 10px; line-height: 1.4; }
+    .mic-button { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 10px; border: 1px solid #e7e5f2; background: #fff; color: #4f42ad; font-size: 11px; font-weight: 680; cursor: pointer; transition: background .2s, transform .2s; white-space: nowrap; }
+    .mic-button:hover { background: var(--soft-violet); transform: translateY(-1px); }
+    .mic-button svg { width: 15px; height: 15px; }
+    .mic-button[aria-pressed="true"] { background: #fff0f0; border-color: #f2cbcb; color: #c34646; }
+    .result-panel { width: min(100%, 760px); margin: 20px auto 0; }
+    .result-area { min-height: 225px; padding: 19px 21px; display: flex; flex-direction: column; }
+    .loading-state { margin: auto; display: flex; align-items: center; gap: 11px; color: #6654d9; font-size: 12px; font-weight: 650; }
+    .loading-state[hidden] { display: none; }
+    .spinner { width: 19px; height: 19px; border: 2px solid #e3defe; border-top-color: #6654d9; border-radius: 50%; animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .result-placeholder { margin: auto 0; color: #a0a29d; text-align: center; font-size: 12px; line-height: 1.7; }
+    .sparkle { width: 32px; height: 32px; margin: 0 auto 10px; border-radius: 11px; display: grid; place-items: center; background: var(--soft-violet); color: var(--violet); }
+    .sparkle svg { width: 16px; height: 16px; }
+    .result-text { margin: 0; white-space: pre-wrap; font-size: 13px; line-height: 1.75; color: #42443f; }
+    .copy-row { padding: 0 21px 17px; display: flex; justify-content: flex-end; }
+    .copy-button { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 11px; border: 1px solid var(--line); border-radius: 9px; color: #666862; background: white; font-size: 11px; font-weight: 680; cursor: pointer; transition: all .18s; }
+    .copy-button:hover:not(:disabled) { border-color: #c8c1f2; color: var(--violet); }
+    .copy-button:disabled { opacity: .45; cursor: default; }
+    .copy-button svg { width: 13px; height: 13px; }
+    .generate-row { display: flex; justify-content: center; margin: 24px 0 0; }
+    .generate-button { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-width: 182px; min-height: 50px; padding: 0 23px; border: 0; border-radius: 13px; background: var(--violet); color: white; font-size: 13px; font-weight: 720; cursor: pointer; box-shadow: 0 7px 17px #6654d933; transition: background .18s, transform .18s, box-shadow .18s; }
+    .generate-button:hover { background: var(--violet-dark); transform: translateY(-2px); box-shadow: 0 10px 22px #6654d944; }
+    .generate-button:active { transform: translateY(0); }
+    .generate-button svg { width: 16px; height: 16px; }
+    .generate-button:disabled { opacity: .72; cursor: wait; }
+    .below { display: flex; justify-content: center; margin: 15px 0 0; color: #9b9d98; font-size: 10px; }
+    .below span { display: inline-flex; gap: 6px; align-items: center; }
+    .below svg { width: 12px; height: 12px; color: #64a889; }
+    footer { width: 100%; max-width: 1240px; margin: auto auto 0; padding-top: 16px; border-top: 1px solid #e9e8e2; display: flex; justify-content: space-between; gap: 12px; color: #9a9c97; font-size: 10px; }
+    .status { min-height: 15px; margin: 10px auto 0; color: #7665cd; font-size: 11px; text-align: center; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    :focus-visible { outline: 3px solid #8d80ec88; outline-offset: 3px; }
+    @media (max-width: 760px) {
+      .page { padding: 19px 20px 18px; }
+      main { padding: 49px 0 35px; }
+      .intro { margin-bottom: 27px; }
+      .subhead { font-size: 14px; }
+      .workspace { grid-template-columns: minmax(0,1fr); gap: 12px; }
+      .panel-head { min-height: 54px; padding: 0 17px; }
+      .input-body { padding: 15px 17px 14px; }
+      textarea { min-height: 125px; }
+      .result-area { min-height: 165px; padding: 17px; }
+      .result-panel { margin-top: 15px; }
+      .copy-row { padding: 0 17px 15px; }
+      .generate-row { margin-top: 17px; }
+      .generate-button { width: 100%; }
+      footer { font-size: 9px; }
+    }
+    @media (max-width: 380px) {
+      .top-note { font-size: 10px; }
+      .panel-meta { font-size: 10px; }
+      .mic-button { padding: 8px 9px; }
+      .hint { max-width: 145px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+    :root {
+      --ink: #25263b;
+      --muted: #75788c;
+      --line: #e7e8f0;
+      --paper: #ffffff;
+      --canvas: #f8f8fc;
+      --violet: #6256dc;
+      --violet-dark: #5145c8;
+      --soft-violet: #f1efff;
+      --shadow: 0 18px 54px rgba(42, 43, 83, .065), 0 2px 8px rgba(42, 43, 83, .035);
+    }
+    body {
+      background: radial-gradient(ellipse at 50% -5%, rgba(226, 224, 255, .58), transparent 45%), var(--canvas);
+    }
+    .page { padding: 28px clamp(20px, 5.5vw, 76px) 30px; }
+    .topbar { max-width: 1160px; }
+    .brand { text-decoration: none; color: var(--ink); transition: opacity .2s ease; }
+    .brand:hover { opacity: .82; }
+    .brand-mark { border-radius: 11px; box-shadow: 0 5px 14px rgba(98, 86, 220, .24); }
+    main { width: min(100%, 920px); padding: clamp(48px, 6.5vw, 76px) 0 50px; }
+    .intro { margin-bottom: 38px; }
+    h1 { font-weight: 730; }
+    .subhead { max-width: 500px; }
+    .panel {
+      border-color: rgba(224, 226, 237, .9);
+      border-radius: 21px;
+      box-shadow: var(--shadow);
+      transition: border-color .24s ease, box-shadow .24s ease, transform .24s ease;
+    }
+    .panel:focus-within {
+      border-color: #d1ccfa;
+      box-shadow: 0 20px 58px rgba(42, 43, 83, .075), 0 0 0 3px rgba(98, 86, 220, .07);
+    }
+    .panel-head { min-height: 62px; padding: 0 24px; border-bottom-color: #f0f1f6; }
+    .step { width: 25px; height: 25px; border-radius: 9px; background: #f1f1f7; color: #6e7082; }
+    .input-body { padding: 23px 24px 18px; }
+    textarea { min-height: 178px; font-size: 15px; line-height: 1.8; }
+    textarea::placeholder { color: #a2a4b2; }
+    .input-foot { padding-top: 16px; border-top-color: #f0f1f6; }
+    .hint, .panel-meta { color: #9295a5; }
+    .mic-button {
+      min-height: 39px;
+      border-color: #e7e5f5;
+      border-radius: 11px;
+      background: #fbfaff;
+      transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+    .mic-button:hover { border-color: #d7d1fa; box-shadow: 0 5px 14px rgba(98, 86, 220, .09); }
+    .result-panel { margin-top: 22px; }
+    .result-area { min-height: 220px; padding: 23px 24px; }
+    .result-text { font-size: 14px; line-height: 1.85; color: #45475e; }
+    #resultText:not([hidden]) { animation: reveal .3s ease both; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .copy-row { padding: 0 24px 19px; }
+    .copy-button {
+      min-height: 37px;
+      padding: 0 13px;
+      border-radius: 10px;
+      transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+    }
+    .copy-button:hover:not(:disabled) { background: #faf9ff; transform: translateY(-1px); }
+    .generate-row { margin-top: 22px; }
+    .generate-button {
+      min-height: 52px;
+      min-width: 196px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6a5ee2, #574bcf);
+      box-shadow: 0 8px 20px rgba(98, 86, 220, .2);
+      transition: background .22s ease, transform .22s ease, box-shadow .22s ease, opacity .22s ease;
+    }
+    .generate-button:hover { background: linear-gradient(135deg, #5d52d5, #4d42c0); box-shadow: 0 11px 25px rgba(98, 86, 220, .24); }
+    .status { color: #6559c9; }
+    :focus-visible { outline-color: rgba(98, 86, 220, .5); }
+    @media (max-width: 760px) {
+      .page { padding: 19px 20px 18px; }
+      main { padding: 46px 0 34px; }
+      .intro { margin-bottom: 29px; }
+      .panel-head { padding: 0 19px; }
+      .input-body { padding: 18px 19px 16px; }
+      textarea { min-height: 145px; }
+      .result-panel { margin-top: 16px; }
+      .result-area { min-height: 180px; padding: 19px; }
+      .copy-row { padding: 0 19px 16px; }
+      .generate-row { margin-top: 18px; }
+      .generate-button { min-height: 50px; }
+      footer { flex-direction: column; align-items: center; text-align: center; gap: 7px; }
+    }
+    @media (max-width: 420px) {
+      .page { padding-inline: 16px; }
+      main { padding-top: 38px; }
+      h1 { font-size: clamp(36px, 11vw, 46px); }
+      .top-note { gap: 7px; font-size: 10px; }
+      .panel-head { padding: 0 15px; }
+      .input-body { padding: 16px 15px 14px; }
+      .result-area { padding: 17px 15px; }
+      .copy-row { padding: 0 15px 14px; }
+      .hint { max-width: 140px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #resultText:not([hidden]) { animation: none; }
+      .spinner { animation: none; border-top-color: #6256dc; }
+    }
+    /* Launch theme: system aware palette, accessible controls and responsive rhythm. */
+    :root { color-scheme: light; --surface: #fff; --canvas: #f7f8fb; --ink: #202234; --muted: #74788c; --line: #e4e6ee; --accent: #6256dc; --accent-strong: #5145c8; --soft: #f0efff; --shadow: 0 24px 70px #29295712, 0 2px 8px #29295708; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; --surface:#171923; --canvas:#101119; --ink:#f1f1f7; --muted:#a2a5b6; --line:#2a2d3a; --accent:#9488ff; --accent-strong:#a69cff; --soft:#26243d; --shadow:0 24px 70px #0005; } }
+    :root[data-theme="dark"] { color-scheme: dark; --surface:#171923; --canvas:#101119; --ink:#f1f1f7; --muted:#a2a5b6; --line:#2a2d3a; --accent:#9488ff; --accent-strong:#a69cff; --soft:#26243d; --shadow:0 24px 70px #0005; }
+    :root[data-theme="light"] { color-scheme: light; }
+    body { color:var(--ink); background:radial-gradient(ellipse at 50% -8%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 45%),var(--canvas); transition:background .2s,color .2s; }
+    .page { padding-inline:clamp(18px,5vw,72px); }
+    .topbar { max-width:1120px; }
+    .brand { text-decoration:none;color:var(--ink); }
+    .theme-toggle { width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line);border-radius:13px;background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .2s,border-color .2s,background .2s; }
+    .theme-toggle:hover { transform:translateY(-1px);border-color:var(--accent); }
+    .theme-toggle svg { width:19px;height:19px; }
+    .top-note { display:none; }
+    main { width:min(100%,820px);padding:clamp(44px,7vw,82px) 0 46px; }
+    .intro { margin-bottom:34px; }
+    h1 { color:var(--ink);font-size:clamp(40px,6.5vw,68px);font-weight:700;letter-spacing:-.065em;line-height:1.04; }
+    h1 span { background:linear-gradient(100deg,var(--accent),#8c7df2);color:transparent;background-clip:text; }
+    .subhead { font-size:16px; }
+    .panel { background:var(--surface);border-color:var(--line);border-radius:22px;box-shadow:var(--shadow); }
+    .panel-head,.input-foot { border-color:var(--line); }
+    .panel-title,.panel-meta,.result-text,.hint,.step,.copy-button { color:var(--ink); }
+    .step { background:var(--soft); }
+    textarea { min-height:150px;max-height:48vh;resize:none;font-size:15px;color:var(--ink); }
+    textarea::placeholder { color:var(--muted);opacity:.78; }
+    .mic-button { width:56px;height:56px;position:relative;justify-content:center;gap:0;padding:0;border-radius:50%;background:var(--accent);border:0;color:#fff;box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 28%,transparent); }
+    .mic-button svg { width:22px;height:22px; }
+    .mic-button #micLabel { position:absolute;right:66px;white-space:nowrap;color:var(--muted);font-size:12px;font-weight:600; }
+    .mic-button:hover { color:#fff;background:var(--accent-strong);transform:translateY(-2px); }
+    .mic-button[aria-pressed="true"] { color:#fff;background:#d94761;box-shadow:0 0 0 0 #d9476140;animation:mic-pulse 1.6s ease-out infinite; }
+    .mic-button[aria-pressed="true"] #micLabel { color:#d94761; }
+    @keyframes mic-pulse { 70% { box-shadow:0 0 0 12px #d9476100; } 100% { box-shadow:0 0 0 0 #d9476100; } }
+    .generate-button:disabled { opacity:.48;cursor:not-allowed;box-shadow:none;transform:none; }
+    .result-area { background:color-mix(in srgb,var(--canvas) 72%,var(--surface));border-radius:0 0 16px 16px; }
+    .result-text { font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:14px; }
+    .result-placeholder { color:var(--muted); }
+    .copy-button { min-height:44px;background:var(--surface);border-color:var(--line); }
+    .copy-button:disabled { opacity:.45; }
+    .loading-state { width:100%;display:block; }
+    .loading-state[hidden] { display:none; }
+    .skeleton { display:block;height:11px;margin:10px 0;border-radius:8px;background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--surface) 42%,var(--line)) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite; }
+    .skeleton:nth-child(2){width:91%}.skeleton:nth-child(3){width:74%}
+    @keyframes shimmer { to { background-position:-200% 0; } }
+    .how { margin:60px auto 8px;max-width:760px; }
+    .how h2 { margin:0 0 22px;text-align:center;font-size:20px;letter-spacing:-.04em; }
+    .steps { display:grid;grid-template-columns:repeat(3,1fr);gap:14px; }
+    .how-step { display:flex;align-items:center;gap:12px;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--surface);color:var(--muted);font-size:13px; }
+    .how-step svg { width:19px;height:19px;flex:none;color:var(--accent); }
+    footer { max-width:1120px;color:var(--muted);border-color:var(--line); }
+    :focus-visible { outline:3px solid color-mix(in srgb,var(--accent) 65%,transparent);outline-offset:3px; }
+    @media(max-width:620px){main{padding-top:46px}.steps{grid-template-columns:1fr}.how{margin-top:45px}.how-step{min-height:52px}.mic-button #micLabel{right:64px}.input-foot{align-items:center}.hint{max-width:calc(100% - 190px)}}
+    @media(prefers-reduced-motion:reduce){.mic-button[aria-pressed="true"]{animation:none}.skeleton{animation:none}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Orato home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M7 7v10M17 7v10M3 10v4M21 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span>Orato</span>
+      </a>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch color theme" title="Switch color theme"><svg id="themeIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42m-9.88 9.88-1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div class="eyebrow"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.8 11.7 8.3 17.2 10l-5.5 1.7L10 17.2l-1.7-5.5L2.8 10l5.5-1.7L10 2.8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> VOICE TO PROMPT</div>
+        <h1 id="page-title">A thought in.<br><span>A great prompt out.</span></h1>
+        <p class="subhead">Speak or type your idea. Get a perfect AI prompt.</p>
+      </section>
+
+      <section class="workspace" aria-label="Prompt converter">
+        <article class="panel">
+          <div class="panel-head"><div class="panel-title"><span class="step">01</span> Your rough idea</div><span class="panel-meta" id="charCount">0 characters</span></div>
+          <div class="input-body">
+            <label class="sr-only" for="sourceText">Type or dictate your idea</label>
+            <textarea id="sourceText" placeholder="For example: I need a cozy coffee shop logo, something earthy but modern, maybe with a little mountain..." spellcheck="true"></textarea>
+            <div class="input-foot">
+              <span class="hint">A few rough words are all you need.</span>
+              <button type="button" class="mic-button" id="micButton" aria-label="Start voice input" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3m-3 0h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <span id="micLabel">Speak your idea</span>
+              </button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div class="generate-row"><button type="button" class="generate-button" id="generateButton">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m10 2 1.8 6.2L18 10l-6.2 1.8L10 18l-1.8-6.2L2 10l6.2-1.8L10 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> Generate my prompt
+      </button></div>
+
+      <article class="panel result-panel" aria-labelledby="resultHeading">
+        <div class="panel-head"><div class="panel-title" id="resultHeading"><span class="step">02</span> Your prompt</div><span class="panel-meta" id="resultMeta">Preview</span></div>
+        <div class="result-area" id="resultArea" aria-live="polite" aria-atomic="true">
+          <div class="loading-state" id="loadingIndicator" role="status" aria-live="polite" hidden><span class="sr-only">Claude is polishing your prompt…</span><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
+          <div class="result-placeholder" id="placeholder"><span class="sparkle"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m10 2 1.8 6.2L18 10l-6.2 1.8L10 18l-1.8-6.2L2 10l6.2-1.8L10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Your polished prompt will appear here.<br>Start with a thought, then hit generate.</div>
+          <p class="result-text" id="resultText" hidden></p>
+        </div>
+        <div class="copy-row"><button type="button" class="copy-button" id="copyButton" aria-label="Copy generated prompt" disabled>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.5"/></svg><span>Copy prompt</span></button></div>
+      </article>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+      <p class="below"><span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8 13 4v3.8c0 3.2-2.2 5.2-5 6.4-2.8-1.2-5-3.2-5-6.4V4l5-2.2Z" stroke="currentColor" stroke-width="1.3"/><path d="m5.8 7.8 1.5 1.5 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg> Text is sent to Puter AI when you generate.</span></p>
+      <section class="how" aria-labelledby="howTitle"><h2 id="howTitle">How it works</h2><div class="steps"><div class="how-step"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v11m-5-6v4a5 5 0 0 0 10 0V8M12 19v2m-4 0h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Speak or type</span></div><div class="how-step"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 2.1 6.9L21 12l-6.9 2.1L12 21l-2.1-6.9L3 12l6.9-2.1L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span>Click Generate</span></div><div class="how-step"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.7"/></svg><span>Copy your prompt</span></div></div></section>
+    </main>
+
+    <footer><span>Orato does not store your input.</span><span>© 2026 Orato</span></footer>
+  </div>
+  <script src="https://js.puter.com/v2/"></script>
+  <script>
+    (() => {
+      const input = document.getElementById('sourceText');
+      const generateButton = document.getElementById('generateButton');
+      const copyButton = document.getElementById('copyButton');
+      const micButton = document.getElementById('micButton');
+      const micLabel = document.getElementById('micLabel');
+      const resultText = document.getElementById('resultText');
+      const placeholder = document.getElementById('placeholder');
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const status = document.getElementById('status');
+      const charCount = document.getElementById('charCount');
+      const resultMeta = document.getElementById('resultMeta');
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      let recognition = null;
+      let listening = false;
+      let dictatedText = '';
+      let copyFeedbackTimer = 0;
+
+      const updateCount = () => {
+        const count = input.value.length;
+        charCount.textContent = `${count.toLocaleString()} ${count === 1 ? 'character' : 'characters'}`;
+      };
+      const resizeInput = () => { input.style.height = 'auto'; input.style.height = `${Math.min(input.scrollHeight, window.innerHeight * .48)}px`; };
+      input.addEventListener('input', () => { updateCount(); resizeInput(); generateButton.disabled = !input.value.trim(); status.textContent = ''; });
+      generateButton.disabled = true;
+      const applyThemeIcon = () => {
+        const dark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        themeIcon.innerHTML = dark
+          ? '<path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.5 8.5 0 1 0 20.5 15.2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'
+          : '<path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42m-9.88 9.88-1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>';
+        themeToggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+        themeToggle.title = dark ? 'Switch to light theme' : 'Switch to dark theme';
+      };
+      try { const savedTheme = localStorage.getItem('orato-theme'); if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.dataset.theme = savedTheme; } catch {}
+      applyThemeIcon();
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        const nextTheme = isDark ? 'light' : 'dark'; document.documentElement.dataset.theme = nextTheme;
+        try { localStorage.setItem('orato-theme', nextTheme); } catch {}
+        applyThemeIcon();
+      });
+
+
+
+      const SYSTEM_PROMPT = 'it rewrites vague, rambling, or already-clear input into a polished, detailed prompt, outputting only the final result';
+
+      generateButton.addEventListener('click', async () => {
+        const userInput = input.value.trim();
+        if (!userInput) {
+          status.textContent = 'Add or speak an idea first, then generate your prompt.';
+          input.focus();
+          return;
+        }
+        if (!window.puter?.ai?.chat) {
+          status.textContent = 'Puter AI did not load. Check your connection and try again.';
+          return;
+        }
+
+        generateButton.disabled = true;
+        copyButton.disabled = true;
+        placeholder.hidden = true;
+        resultText.hidden = true;
+        loadingIndicator.hidden = false;
+        resultMeta.textContent = 'Generating…';
+        status.textContent = '';
+        try {
+          const response = await window.puter.ai.chat(
+            [
+              { role: 'system', content: SYSTEM_PROMPT },
+              { role: 'user', content: userInput }
+            ],
+            { model: 'claude-sonnet-4-6', normalize: true }
+          );
+          const content = response?.message?.content;
+          const finalPrompt = typeof content === 'string'
+            ? content.trim()
+            : Array.isArray(content)
+              ? content.map((part) => part?.text || '').join('').trim()
+              : '';
+          if (!finalPrompt) throw new Error('Claude returned an empty response.');
+
+          resultText.textContent = finalPrompt;
+          resultText.hidden = false;
+          resultMeta.textContent = `${finalPrompt.length.toLocaleString()} characters`;
+          copyButton.disabled = false;
+          status.textContent = 'Your prompt is ready to copy.';
+        } catch (error) {
+          console.error('Puter AI request failed:', error);
+          placeholder.hidden = Boolean(resultText.textContent);
+          resultText.hidden = !resultText.textContent;
+          copyButton.disabled = !resultText.textContent;
+          resultMeta.textContent = resultText.textContent ? `${resultText.textContent.length.toLocaleString()} characters` : 'Preview';
+          status.textContent = 'Could not generate a prompt right now. Please try again.';
+        } finally {
+          loadingIndicator.hidden = true;
+          generateButton.disabled = false;
+        }
+      });
+
+      copyButton.addEventListener('click', async () => {
+        if (!resultText.textContent) return;
+        try {
+          await navigator.clipboard.writeText(resultText.textContent);
+          window.clearTimeout(copyFeedbackTimer);
+          copyButton.querySelector('span').textContent = 'Copied!';
+          copyButton.querySelector('svg').innerHTML = '<path d="m4 10 5 5L20 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+          status.textContent = 'Copied to clipboard.';
+          copyFeedbackTimer = window.setTimeout(() => {
+            copyButton.querySelector('span').textContent = 'Copy prompt';
+            copyButton.querySelector('svg').innerHTML = '<rect x="7" y="7" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.5"/>';
+          }, 2000);
+        } catch {
+          const range = document.createRange();
+          range.selectNodeContents(resultText);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          status.textContent = 'Prompt selected. Press Ctrl+C or ⌘C to copy.';
+        }
+      });
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = navigator.language || 'en-US';
+        recognition.interimResults = true;
+        recognition.continuous = true;
+        recognition.onstart = () => {
+          listening = true;
+          dictatedText = input.value ? `${input.value.trim()} ` : '';
+          micButton.setAttribute('aria-pressed', 'true');
+          micButton.setAttribute('aria-label', 'Stop voice input');
+          micLabel.textContent = 'Listening…';
+          status.textContent = 'Listening. Speak naturally, then tap the microphone to finish.';
+        };
+        recognition.onresult = (event) => {
+          let interim = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const words = event.results[i][0].transcript;
+            if (event.results[i].isFinal) dictatedText += `${words} `;
+            else interim += words;
+          }
+          input.value = `${dictatedText}${interim}`.trimStart();
+          updateCount(); resizeInput(); generateButton.disabled = !input.value.trim();
+        };
+        recognition.onerror = (event) => {
+          status.textContent = event.error === 'not-allowed' || event.error === 'service-not-allowed'
+            ? 'Microphone access is blocked. Allow it in your browser settings, or type your idea instead.'
+            : 'Voice input had a hiccup. Try again, or type your idea.';
+        };
+        recognition.onend = () => {
+          listening = false;
+          micButton.setAttribute('aria-pressed', 'false');
+          micButton.setAttribute('aria-label', 'Start voice input');
+          micLabel.textContent = 'Speak your idea';
+          if (input.value.trim()) status.textContent = 'Voice input added. Generate when you’re ready.';
+        };
+        micButton.addEventListener('click', () => listening ? recognition.stop() : recognition.start());
+      } else {
+        micButton.addEventListener('click', () => {
+          status.textContent = 'Voice input is not available in this browser. You can type your idea instead.';
+        });
+        micButton.title = 'Voice input is not supported by this browser';
+      }
+    })();
+  </script>
+</body>
+</html>
+
+
